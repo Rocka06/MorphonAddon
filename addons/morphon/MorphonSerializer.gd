@@ -76,6 +76,11 @@ static func _DeserializeRecursive(variant):
 			return JSON.to_native(dict)
 		
 		for i in keys:
+			#We dont want to deserialize this
+			if i == "._typeName":
+				result[i] = dict[i]
+				continue
+			
 			result[i] = _DeserializeRecursive(dict[i])
 		
 		if dict.has("._typeName"):
@@ -117,7 +122,6 @@ static func _DeserializeResource(dict : Dictionary):
 	
 	if !dict.has("._typeName"):
 		return null
-	
 	
 	if !_registeredScripts.has(dict["._typeName"]):
 		push_error("Script name\"", dict["._typeName"], "\" has not been registered! Register it with MorphonSerializer.RegisterScript(name, script)");

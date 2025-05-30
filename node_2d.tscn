@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3vfm561wdpuv"]
+[gd_scene load_steps=9 format=3 uid="uid://c3vfm561wdpuv"]
 
 [ext_resource type="Script" uid="uid://cbmwc5xpbw0c2" path="res://Test.gd" id="1_wtcfe"]
 [ext_resource type="Script" uid="uid://7xy2nqd5rnkf" path="res://Animal.gd" id="2_epypp"]
 [ext_resource type="Script" uid="uid://bycm3tpn5443w" path="res://Dog.gd" id="3_0hol4"]
 [ext_resource type="Texture2D" uid="uid://butkivojlwf8x" path="res://icon.svg" id="4_0hol4"]
+[ext_resource type="Script" uid="uid://kubb30q8i8au" path="res://Cat.gd" id="4_q6r6c"]
 
 [sub_resource type="Resource" id="Resource_q6r6c"]
 script = ExtResource("3_0hol4")
@@ -18,9 +19,17 @@ Name = "Cat"
 Age = 7
 metadata/_custom_type_script = "uid://7xy2nqd5rnkf"
 
+[sub_resource type="Resource" id="Resource_d21ai"]
+script = ExtResource("4_q6r6c")
+color = Color(1, 1, 0.482353, 1)
+Name = "Kitty"
+Age = 1
+metadata/_custom_type_script = "uid://kubb30q8i8au"
+
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_wtcfe")
-AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu")])
+AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu"), SubResource("Resource_d21ai")])
 Icon = ExtResource("4_0hol4")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(556, 280)
