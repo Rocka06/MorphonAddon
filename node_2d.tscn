@@ -1,3 +1,26 @@
-[gd_scene format=3 uid="uid://c3vfm561wdpuv"]
+[gd_scene load_steps=7 format=3 uid="uid://c3vfm561wdpuv"]
+
+[ext_resource type="Script" uid="uid://cbmwc5xpbw0c2" path="res://Test.gd" id="1_wtcfe"]
+[ext_resource type="Script" uid="uid://7xy2nqd5rnkf" path="res://Animal.gd" id="2_epypp"]
+[ext_resource type="Script" uid="uid://bycm3tpn5443w" path="res://Dog.gd" id="3_0hol4"]
+[ext_resource type="Texture2D" uid="uid://butkivojlwf8x" path="res://icon.svg" id="4_0hol4"]
+
+[sub_resource type="Resource" id="Resource_q6r6c"]
+script = ExtResource("3_0hol4")
+type = "Golden Retriever"
+Name = "Doggo"
+Age = 4
+metadata/_custom_type_script = "uid://bycm3tpn5443w"
+
+[sub_resource type="Resource" id="Resource_kdubu"]
+script = ExtResource("2_epypp")
+Name = "Cat"
+Age = 7
+metadata/_custom_type_script = "uid://7xy2nqd5rnkf"
 
 [node name="Node2D" type="Node2D"]
+script = ExtResource("1_wtcfe")
+AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu")])
+Icon = ExtResource("4_0hol4")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]

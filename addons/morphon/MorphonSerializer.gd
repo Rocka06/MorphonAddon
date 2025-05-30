@@ -1,23 +1,23 @@
 @tool
 class_name MorphonSerializer extends EditorPlugin
 
-var _jsonTypes := [TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_STRING, TYPE_STRING_NAME]
-var _registeredScripts : Dictionary[String, String]
+static var _jsonTypes := [TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_STRING_NAME]
+static var _registeredScripts : Dictionary[String, String]
 
-func register_script(name : String, script : Script):
+static func register_script(name : String, script : Script):
 	if _registeredScripts.has(name):
 		push_error("You have already registered a script named ", name)
 		return
 	
 	_registeredScripts[name] = script.resource_path
-func register_script_by_path(name : String, path : String):
+static func register_script_by_path(name : String, path : String):
 	if _registeredScripts.has(name):
 		push_error("You have already registered a script named ", name)
 		return
 	
 	_registeredScripts[name] = path
 
-func _SerializeRecursive(variant):
+static func _SerializeRecursive(variant):
 	if typeof(variant) in _jsonTypes:
 		return variant
 	
@@ -53,7 +53,7 @@ func _SerializeRecursive(variant):
 		return result
 	
 	return JSON.from_native(variant)
-func _DeserializeRecursive(variant):
+static func _DeserializeRecursive(variant):
 	if variant is String:
 		var str : String = variant
 		if str.begins_with("res://"):
@@ -94,7 +94,7 @@ func _DeserializeRecursive(variant):
 		
 	return JSON.to_native(variant)
 
-func _SerializeResource(res : Resource) -> Dictionary:
+static func _SerializeResource(res : Resource) -> Dictionary:
 	var data : Dictionary
 	
 	if res.has_method("_serialize"):
@@ -105,25 +105,25 @@ func _SerializeResource(res : Resource) -> Dictionary:
 	
 	var scriptPath : String = res.get_script().resource_path
 	
-	data["._typeName"] = _registeredScripts.find_key(scriptPath)
-	if data["._typeName"] == null:
+	if _registeredScripts.find_key(scriptPath) == null:
 		push_error("Script \"", scriptPath, "\" has not been registered! Register it with MorphonSerializer.RegisterScript(name, script)");
 		return {}
 
+	data["._typeName"] = _registeredScripts.find_key(scriptPath)
 	return data
-func _DeserializeResource(dict : Dictionary):
+static func _DeserializeResource(dict : Dictionary):
 	if dict.is_empty(): 
 		return null
 	
 	if !dict.has("._typeName"):
 		return null
 	
-	var scriptPath : String = _registeredScripts.find_key(dict["._typeName"])
 	
-	if scriptPath == null:
+	if !_registeredScripts.has(dict["._typeName"]):
 		push_error("Script name\"", dict["._typeName"], "\" has not been registered! Register it with MorphonSerializer.RegisterScript(name, script)");
 		return null
 	
+	var scriptPath : String = _registeredScripts[dict["._typeName"]]
 	var script : Script = ResourceLoader.load(scriptPath)
 	
 	if !script:
@@ -144,7 +144,7 @@ func _DeserializeResource(dict : Dictionary):
 	
 	return res
 
-func _IsValidPath(path : String) -> bool:
+static func _IsValidPath(path : String) -> bool:
 	if !path.begins_with("res://"):
 		return false;
 
@@ -158,7 +158,7 @@ func _IsValidPath(path : String) -> bool:
 		return false;
 
 	return true;
-func _GetResourceProperties(res : Resource) -> Dictionary:
+static func _GetResourceProperties(res : Resource) -> Dictionary:
 	var result : Dictionary
 	var properties := res.get_property_list()
 	
