@@ -20,6 +20,15 @@ func set_value(section : String, key : String, value):
 
 	_values[section][key] = value
 
+func set_cloned_value(section : String, key : String, value):
+	#The reason I wrote it this way is because .duplicate
+	#doesn't always work
+	
+	var serialized = MorphonSerializer._SerializeRecursive(value)
+	var deserialized = MorphonSerializer._DeserializeRecursive(serialized)
+	
+	set_value(section, key, deserialized)
+
 func get_value(section : String, key : String, default = null):
 	if !_values.has(section) or !_values[section].has(key):
 		if default == null:
@@ -190,6 +199,3 @@ func save_encrypted_pass(path : String, password : String) -> Error:
 
 func clear():
 	_values.clear()
-
-func reload_from_serialized_copy():
-	parse(encode_to_text())

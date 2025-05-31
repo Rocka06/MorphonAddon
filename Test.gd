@@ -6,9 +6,20 @@ extends Node
 func _ready() -> void:
 	var config := MorphonConfigFile.new()
 	
+	var referencedDog := Dog.new()
+	var clonedDog := Dog.new()
+	
+	referencedDog.Name = "Doggo"
+	clonedDog.Name = "Bruno"
+	
 	config.set_value("Pets", "AnimalList", AnimalList)
 	config.set_value("Player", "Health", 31.2)
 	config.set_value("Player", "Icon", Icon)
+	config.set_value("Test", "referencedDog", referencedDog)
+	config.set_cloned_value("Test", "clonedDog", clonedDog)
+	
+	referencedDog.Name = "Rewritten"
+	clonedDog.Name = "Rewritten"
 	
 	config.save("user://save.json")
 	config.clear()

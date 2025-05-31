@@ -17,6 +17,10 @@ public partial class MorphonConfigFile : RefCounted
     {
         m_Config.Call("set_value", section, key, value);
     }
+    public void SetClonedValue(string section, string key, Variant value)
+    {
+        m_Config.Call("set_cloned_value", section, key, value);
+    }
     public Variant GetValue(string section, string key, Variant @default = default)
     {
         return m_Config.Call("get_value", section, key, @default);
@@ -87,10 +91,5 @@ public partial class MorphonConfigFile : RefCounted
         Script s = ResourceLoader.Load<Script>("res://addons/morphon/MorphonConfigFile.gd");
         m_Config.SetScript(s);
         GC.Collect();
-    }
-
-    public void ReloadFromSerializedCopy()
-    {
-        m_Config.Call("reload_from_serialized_copy");
     }
 }
