@@ -2,6 +2,10 @@ class_name MorphonConfigFile extends RefCounted
 
 var _values : Dictionary[String, Dictionary]
 
+func _init() -> void:
+	MorphonSerializer._scan_and_register_resources()
+	MorphonSerializer._autoRegRun = true
+
 func set_value(section : String, key : String, value):
 	if (value == null):
 		#Erase key.
