@@ -79,7 +79,7 @@ func erase_section_key(section : String, key : String):
 func save(path : String) -> Error:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if !file:
-		return file.get_open_error()
+		return FileAccess.get_open_error()
 
 	file.store_string(encode_to_text())
 	file.close()
@@ -90,7 +90,7 @@ func load(path : String) -> Error:
 	var file := FileAccess.open(path, FileAccess.READ)
 
 	if !file:
-		return file.get_open_error()
+		return FileAccess.get_open_error()
 
 	var stringData := file.get_as_text()
 	file.close()
@@ -190,3 +190,6 @@ func save_encrypted_pass(path : String, password : String) -> Error:
 
 func clear():
 	_values.clear()
+
+func reload_from_serialized_copy():
+	parse(encode_to_text())

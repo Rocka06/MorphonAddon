@@ -88,4 +88,9 @@ public partial class MorphonConfigFile : RefCounted
         m_Config.SetScript(s);
         GC.Collect();
     }
+
+    public void ReloadFromSerializedCopy()
+    {
+        m_Config.Call("reload_from_serialized_copy");
+    }
 }
