@@ -1,10 +1,13 @@
-[gd_scene load_steps=9 format=3 uid="uid://c3vfm561wdpuv"]
+[gd_scene load_steps=15 format=3 uid="uid://c3vfm561wdpuv"]
 
 [ext_resource type="Script" uid="uid://cbmwc5xpbw0c2" path="res://Test.gd" id="1_wtcfe"]
 [ext_resource type="Script" uid="uid://7xy2nqd5rnkf" path="res://Animal.gd" id="2_epypp"]
 [ext_resource type="Script" uid="uid://bycm3tpn5443w" path="res://Dog.gd" id="3_0hol4"]
 [ext_resource type="Texture2D" uid="uid://butkivojlwf8x" path="res://icon.svg" id="4_0hol4"]
 [ext_resource type="Script" uid="uid://kubb30q8i8au" path="res://Cat.gd" id="4_q6r6c"]
+[ext_resource type="Script" uid="uid://cho86qisap8sk" path="res://CSharpTest/TestCsharp.cs" id="6_kdubu"]
+[ext_resource type="Script" uid="uid://b48ifnnm7rp8j" path="res://CSharpTest/Car.cs" id="7_rj586"]
+[ext_resource type="Script" uid="uid://cq2m2gtvl5ywi" path="res://CSharpTest/Vehicle.cs" id="8_4d7sh"]
 
 [sub_resource type="Resource" id="Resource_q6r6c"]
 script = ExtResource("3_0hol4")
@@ -26,6 +29,26 @@ Name = "Kitty"
 Age = 1
 metadata/_custom_type_script = "uid://kubb30q8i8au"
 
+[sub_resource type="Resource" id="Resource_ir8iy"]
+script = ExtResource("7_rj586")
+year = 2004
+brand = "Ford"
+color = Color(6.73831e-07, 0.752693, 0.752693, 1)
+metadata/_custom_type_script = "uid://b48ifnnm7rp8j"
+
+[sub_resource type="Resource" id="Resource_hqns4"]
+script = ExtResource("8_4d7sh")
+brand = "Lamborghini"
+color = Color(0, 0.564706, 0, 0.615686)
+metadata/_custom_type_script = "uid://cq2m2gtvl5ywi"
+
+[sub_resource type="Resource" id="Resource_x0ka3"]
+script = ExtResource("7_rj586")
+year = 1989
+brand = "Mazda"
+color = Color(0.8, 0, 0, 1)
+metadata/_custom_type_script = "uid://b48ifnnm7rp8j"
+
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_wtcfe")
 AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu"), SubResource("Resource_d21ai")])
@@ -33,3 +56,7 @@ Icon = ExtResource("4_0hol4")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(556, 280)
+
+[node name="CSharpTest" type="Node2D" parent="."]
+script = ExtResource("6_kdubu")
+vehicles = Array[Object]([SubResource("Resource_ir8iy"), SubResource("Resource_hqns4"), SubResource("Resource_x0ka3")])

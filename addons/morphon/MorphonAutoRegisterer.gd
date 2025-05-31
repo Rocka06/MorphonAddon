@@ -19,10 +19,12 @@ func _scan_and_register_resources(path := "res://"):
 
 		if dir.current_is_dir():
 			_scan_and_register_resources(full_path)
-		elif file_name.ends_with(".gd"):
+		elif file_name.ends_with(".gd") or file_name.ends_with(".cs"):
 			var script = load(full_path) as Script
+			var name = file_name.get_basename()
 			if script and script.get_instance_base_type() == "Resource":
-				var name = file_name.get_basename()
+				MorphonSerializer.register_script(name, script)
+			elif script.has_method("_serialize") and script.has_method("_deserialize"):
 				MorphonSerializer.register_script(name, script)
 
 		file_name = dir.get_next()
