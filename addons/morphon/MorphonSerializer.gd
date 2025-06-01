@@ -87,13 +87,11 @@ static func _SerializeRecursive(variant):
 static func _DeserializeRecursive(variant):
 	if variant is String:
 		var str : String = variant
-		if str.begins_with("res://"):
-			if str.to_lower().ends_with(".gd") or str.to_lower().ends_with(".cs"):
-				return null
-			
-			if _IsValidPath(str):
-				return ResourceLoader.load(str)
-		return variant
+		
+		if _IsValidPath(str):
+			return ResourceLoader.load(str)
+		
+		return str
 	
 	if typeof(variant) in _jsonTypes:
 		return variant
@@ -181,18 +179,21 @@ static func _DeserializeResource(dict : Dictionary):
 
 static func _IsValidPath(path : String) -> bool:
 	if !path.begins_with("res://"):
-		return false;
+		return false
 
 	if path.find("..") != -1:
-		return false;
+		return false
 
-	var abs_path = ProjectSettings.globalize_path(path);
-	var abs_root = ProjectSettings.globalize_path("res://");
+	var abs_path = ProjectSettings.globalize_path(path)
+	var abs_root = ProjectSettings.globalize_path("res://")
 
 	if !abs_path.begins_with(abs_root):
-		return false;
+		return false
+		
+	if path.to_lower().ends_with(".gd") or path.to_lower().ends_with(".cs"):
+		return false
 
-	return true;
+	return true
 static func _GetResourceProperties(res : Resource) -> Dictionary:
 	var result : Dictionary
 	var properties := res.get_property_list()
