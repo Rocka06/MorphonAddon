@@ -4,13 +4,11 @@ using Godot;
 public partial class MorphonConfigFile : RefCounted
 {
     private RefCounted m_Config;
-    private ConfigFile asd;
 
     public MorphonConfigFile()
     {
         m_Config = new();
-        Script s = ResourceLoader.Load<Script>("res://addons/morphon/MorphonConfigFile.gd");
-        m_Config.SetScript(s);
+        m_Config.SetScript(ResourceLoader.Load<Script>("res://addons/morphon/MorphonConfigFile.gd"));
     }
 
     public void SetValue(string section, string key, Variant value)
@@ -91,5 +89,35 @@ public partial class MorphonConfigFile : RefCounted
         Script s = ResourceLoader.Load<Script>("res://addons/morphon/MorphonConfigFile.gd");
         m_Config.SetScript(s);
         GC.Collect();
+    }
+}
+
+public static class MorhponSerializer
+{
+    readonly static Script m_Script;
+
+    static MorhponSerializer()
+    {
+        m_Script = ResourceLoader.Load<Script>("res://addons/morphon/MorphonSerializer.gd");
+    }
+
+    public static Variant StrToVar(string str)
+    {
+        return m_Script.Call("str_to_var", str);
+    }
+
+    public static string VarToStr(Variant variant)
+    {
+        return m_Script.Call("var_to_str", variant).As<string>();
+    }
+
+    public static Variant BytesToVar(byte[] bytes)
+    {
+        return m_Script.Call("bytes_to_var", bytes);
+    }
+
+    public static byte[] VarToBytes(Variant variant)
+    {
+        return m_Script.Call("var_to_bytes", variant).As<byte[]>();
     }
 }

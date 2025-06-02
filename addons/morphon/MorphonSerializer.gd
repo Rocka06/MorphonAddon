@@ -48,6 +48,16 @@ static func register_script_by_path(name : String, path : String):
 	
 	_registeredScripts[name] = path
 
+static func var_to_str(variant) -> String:
+	return var_to_str(_SerializeRecursive(variant))
+static func var_to_bytes(variant) -> PackedByteArray:
+	return var_to_bytes(_SerializeRecursive(variant))
+
+static func str_to_var(str : String):
+	return _DeserializeRecursive(str_to_var(str))
+static func bytes_to_var(bytes : PackedByteArray):
+	return _DeserializeRecursive(bytes_to_var(bytes))
+
 static func _SerializeRecursive(variant):
 	if typeof(variant) in _jsonTypes:
 		return variant
