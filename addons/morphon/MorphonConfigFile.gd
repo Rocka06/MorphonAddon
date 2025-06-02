@@ -28,7 +28,6 @@ var _values : Dictionary[String, Dictionary]
 
 func _init() -> void:
 	MorphonSerializer._scan_and_register_resources()
-	MorphonSerializer._autoRegRun = true
 
 ## Assigns a value to the specified key of the specified section.[br]
 ## If either the section or the key do not exist, they are created. [br]
