@@ -35,12 +35,17 @@ static func _scan_and_register_resources(path := "res://"):
 		file_name = dir.get_next()
 	dir.list_dir_end()
 
+## Register a [Script] for serialization.
+## If the name was already registered the function will throw an error. 
 static func register_script(name : String, script : Script):
 	if _registeredScripts.has(name):
 		push_error("You have already registered a script named ", name)
 		return
 	
 	_registeredScripts[name] = script.resource_path
+
+## Register a [Script] for serialization by it's path.
+## If the name was already registered the function will throw an error. 
 static func register_script_by_path(name : String, path : String):
 	if _registeredScripts.has(name):
 		push_error("You have already registered a script named ", name)
@@ -48,13 +53,34 @@ static func register_script_by_path(name : String, path : String):
 	
 	_registeredScripts[name] = path
 
+## Converts a [Variant] to a formatted [String] that can then be parsed using [method MorphonSerializer.str_to_var].
+## [codeblock]
+## var a = { "a": 1, "b": 2 }
+## print(var_to_str(a))
+## [/codeblock]
+## [codeblock]
+## {
+## 	"a": 1,
+## 	"b": 2
+## }
+## [/codeblock]
 static func var_to_str(variant) -> String:
 	return var_to_str(_SerializeRecursive(variant))
+
+## Encodes a [Variant] value to a [PackedByteArray]. Deserialization can be done with [method MorphonSerializer.bytes_to_var].
 static func var_to_bytes(variant) -> PackedByteArray:
 	return var_to_bytes(_SerializeRecursive(variant))
 
+## Converts a formatted string that was returned by [method MorphonSerializer.var_to_str] to the original [Variant]
+## [codeblock]
+## var data = '{ "a": 1, "b": 2 }' # data is a String
+## var dict = str_to_var(data)     # dict is a Dictionary
+## print(dict["a"])                # Prints 1
+##[/codeblock]
 static func str_to_var(str : String):
 	return _DeserializeRecursive(str_to_var(str))
+
+## Decodes a [PackedByteArray] back to a [Variant] value.
 static func bytes_to_var(bytes : PackedByteArray):
 	return _DeserializeRecursive(bytes_to_var(bytes))
 
