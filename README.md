@@ -1,7 +1,14 @@
 # MorphonAddon
 
-MorphonAddon is a library for [Godot](https://godotengine.org/) 4.4+ that provides safe serialization and deserialization for custom `Resource` objects.
-It works in both GDScript and C#, and offers an API similar to Godot's built-in `ConfigFile` making it easy to integrate into any project.
+[![Godot 4.4+](https://img.shields.io/badge/Godot-4.4%2B-blue.svg)](https://godotengine.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+MorphonAddon is a **safe serialization library for Godot 4.4+** that works with both GDScript and C#. It lets you serialize and deserialize custom `Resource` objects (including nested and array structures) to human-readable JSON, with an API similar to Godot's built-in `ConfigFile` but without the risk of code injection.
+
+> **Why?**  
+> Godot’s built-in object serialization methods can execute arbitrary code during deserialization, posing security risks. MorphonAddon avoids this by safely reconstructing only registered custom Resources, keeping your data and users secure.
+
+---
 
 ## Features
 
@@ -10,21 +17,26 @@ It works in both GDScript and C#, and offers an API similar to Godot's built-in 
 - **Works out of the box:** You don't have to add any autoloads, or turn on any addons. Just copy the files into your project and you're good to go!
 - **C# and GDScript Support:** Works perfectly with both scripting languages in Godot
 
+---
+
 ## How It Works
 
-When creating a MorphonConfigFile, the addon scans your project for custom `Resource` scripts, and registers them for serialization.
-When saving, object data is serialized to dictionaries, and when loading, resources are reconstructed with their original registered scripts and property values.
+When you use MorphonConfigFile, the addon scans your project for custom `Resource` scripts and registers them for serialization.  
+- **Saving:** Object data is converted to dictionaries.
+- **Loading:** Objects are rebuilt with the correct script and property values.
 
-> **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If they are not local to the scene, their resource path will be stored and reloaded.
+> **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If not local to the scene, only their path is stored and reloaded.
 
-If you extend a built-in resource type (e.g., `SpriteFrames`) or you don't want every property to be saved from your object, you will have to implement these methods in your script:
+### Custom Serialization
 
-GDScript:
+To control which properties are saved or if you extend a built-in resource type (e.g., `SpriteFrames`),  you will have to implement these methods in your script:
+
+**GDScript**
 ```gdscript
 func _serialize() -> Dictionary
 func _deserialize(data: Dictionary)
 ```
-Or in C#:
+**C#**
 ```csharp
 public Dictionary _serialize();
 public void _deserialize(Dictionary data);
@@ -34,24 +46,25 @@ In the `_serialize` method you have to return a Dictionary with a string key and
 In the `_deserialize` method you have to read the properties back into your objects.
 
 <details>
-  <summary>Example</summary>
+  <summary>GDScript Example</summary>
 
   ```gdscript
   class_name Cat extends Resource
-  
+
   @export var name : String
   @export var age : int
   @export var color : Color
 
   func _serialize() -> Dictionary:
-    return {"color": color}
-	
+      return {"color": color}
+
   func _deserialize(data : Dictionary):
-    color = data["color"]
+      color = data["color"]
   ```
-  
-  This way only the `color` property will get serialized and saved
+  In this case only the `color` property will be saved.
 </details>
+
+---
 
 ## Usage of MorphonConfigFile
 
@@ -283,46 +296,39 @@ I also added an extra method `set_cloned_value` that first clones the object, an
 
 As you can see, the usage is the exact same for the MorphonConfigFile as for the built-in ConfigFile class, but without arbitrary code execution on deserialization!
 
-## Usage of `MorphonSerializer.var_to_bytes` and `MorphonSerializer.var_to_str`
+---
 
-The library also contains four extra functions, that also works the exact same as the built in ones, but without running any arbitrary code after deserializing `Resources`.
+## Extra Utilities
+
+`MorphonSerializer.var_to_bytes` `MorphonSerializer.bytes_to_var` and `MorphonSerializer.var_to_str` `MorphonSerializer.str_to_var` work like the built-in ones, but without unsafe code execution.
+
+**These also don't support built-in resource serialization (like SpriteFrames). Those will only be saved by their paths only if they are not local to scene**
 
 <details>
-	<summary>Example</summary>
-	
+<summary>Example</summary>
+
 ```gdscript
 extends Node
 
 @export var AnimalList: Array[Animal]
 
 func _ready() -> void:
-	print(MorphonSerializer.var_to_str(AnimalList))
-```
-
-Running this code prints:
-```
-[{
-"._typeName": "Animal",
-"Age": 7,
-"Name": "Dog"
-}, {
-"._typeName": "Cat",
-"Age": 1,
-"Name": "Kitty",
-"color": {
-"args": [1.0, 1.0, 0.482353, 1.0],
-"type": "Color"
-}
-}]
+    print(MorphonSerializer.var_to_str(AnimalList))
 ```
 </details>
+
+---
 
 ## Installation
 
 - Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
-- **If you want to use the library with C# the path to the addon must be this or it won't work: res://addons/morphon**
+- **If you want to use the library with C# the path to the addon must be `res://addons/morphon` or it won't work**
 
 ## Limitations
 
-- Built-in resources are not serialized directly, and they are only saved by their paths if they are not local to scene.
+- Built-in resources (like SpriteFrames) are not serialized directly, and they are only saved by their paths if they are not local to scene.
 - Only scripts inheriting from `Resource` or implementing the required methods are fully supported for serialization.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
