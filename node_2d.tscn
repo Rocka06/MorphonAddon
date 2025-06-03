@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=3 uid="uid://c3vfm561wdpuv"]
+[gd_scene load_steps=23 format=3 uid="uid://c3vfm561wdpuv"]
 
 [ext_resource type="Script" uid="uid://cbmwc5xpbw0c2" path="res://Test.gd" id="1_wtcfe"]
 [ext_resource type="Script" uid="uid://7xy2nqd5rnkf" path="res://Animal.gd" id="2_epypp"]
 [ext_resource type="Script" uid="uid://bycm3tpn5443w" path="res://Dog.gd" id="3_0hol4"]
 [ext_resource type="Texture2D" uid="uid://butkivojlwf8x" path="res://icon.svg" id="4_0hol4"]
 [ext_resource type="Script" uid="uid://kubb30q8i8au" path="res://Cat.gd" id="4_q6r6c"]
+[ext_resource type="Script" uid="uid://pwsfrym6m755" path="res://sprite_frames_serialized.gd" id="6_4d7sh"]
 [ext_resource type="Script" uid="uid://cho86qisap8sk" path="res://CSharpTest/TestCsharp.cs" id="6_kdubu"]
 [ext_resource type="Script" uid="uid://b48ifnnm7rp8j" path="res://CSharpTest/Car.cs" id="7_rj586"]
 [ext_resource type="Script" uid="uid://cq2m2gtvl5ywi" path="res://CSharpTest/Vehicle.cs" id="8_4d7sh"]
@@ -28,6 +29,58 @@ color = Color(1, 1, 0.482353, 1)
 Name = "Kitty"
 Age = 1
 metadata/_custom_type_script = "uid://kubb30q8i8au"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ir8iy"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hqns4"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(96, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x0ka3"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(32, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0h7mo"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(32, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nr8wp"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(64, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d2bti"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ta5nu"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ir8iy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hqns4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x0ka3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0h7mo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nr8wp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d2bti")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+script = ExtResource("6_4d7sh")
+metadata/_custom_type_script = "uid://pwsfrym6m755"
 
 [sub_resource type="Resource" id="Resource_ir8iy"]
 script = ExtResource("7_rj586")
@@ -53,6 +106,7 @@ metadata/_custom_type_script = "uid://b48ifnnm7rp8j"
 script = ExtResource("1_wtcfe")
 AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu"), SubResource("Resource_d21ai")])
 Icon = ExtResource("4_0hol4")
+frames = SubResource("SpriteFrames_ta5nu")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(556, 280)
@@ -60,3 +114,6 @@ position = Vector2(556, 280)
 [node name="CSharpTest" type="Node2D" parent="."]
 script = ExtResource("6_kdubu")
 vehicles = Array[Object]([SubResource("Resource_ir8iy"), SubResource("Resource_hqns4"), SubResource("Resource_x0ka3")])
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(281, 175)

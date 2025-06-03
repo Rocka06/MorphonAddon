@@ -8,16 +8,36 @@ static var _autoRegRun := false
 static func _scan_and_register_resources():
 	if _autoRegRun:
 		return
-		
+
 	var classes := ProjectSettings.get_global_class_list()
 	for classDict in classes:
-		var script = load(classDict["path"]) as Script
-		var name = classDict["class"]
-		if script and script.get_instance_base_type() == "Resource":
-			register_script(name, script)
-		elif script.has_method("_serialize") and script.has_method("_deserialize"):
-			register_script(name, script)
-	
+		var script := load(classDict["path"]) as Script
+		var name : String = classDict["class"]
+		
+		# Without this a stack overflow would happen
+		if name.contains("Morphon"):
+			continue
+
+		if not script:
+			continue
+
+		var base_type := script.get_instance_base_type()
+		var should_register := false
+
+		if base_type == "Resource":
+			# If the custom resource extends Resource
+			should_register = true
+		elif ClassDB.class_exists(base_type):
+			# If the custom resource extends a built in type
+			var instance := ClassDB.instantiate(base_type)
+			instance.set_script(script)
+			if instance.has_method("_serialize") and instance.has_method("_deserialize"):
+				should_register = true
+				
+		if should_register:
+			register_script_by_path(name, script.resource_path)
+
+
 	_autoRegRun = true
 
 ## Register a [Script] for serialization.
@@ -78,6 +98,9 @@ static func _SerializeRecursive(variant):
 		
 		#Check if it is a custom resource or a built in one
 		if res.get_class() == "Resource":
+			return _SerializeResource(res)
+	
+		if res.has_method("_serialize") and res.has_method("_deserialize"):
 			return _SerializeResource(res)
 	
 		if !res.resource_local_to_scene:
@@ -183,7 +206,7 @@ static func _DeserializeResource(dict : Dictionary):
 	if !script:
 		return null
 	
-	var res := Resource.new()
+	var res := ClassDB.instantiate(script.get_instance_base_type())
 	res.set_script(script)
 	
 	if res.has_method("_deserialize"):
