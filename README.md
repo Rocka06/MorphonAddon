@@ -1,80 +1,328 @@
 # MorphonAddon
 
 MorphonAddon is a library for [Godot](https://godotengine.org/) 4.4+ that provides safe serialization and deserialization for custom `Resource` objects.
-It works in both GDScript and C#, and offers an API similar to Godot's built-in `ConfigFile`.
+It works in both GDScript and C#, and offers an API similar to Godot's built-in `ConfigFile` making it easy to integrate into any project.
 
 ## Features
 
-- **Custom Resource Serialization:** Serialize and deserialize custom `Resource` objects, including nested and array structures
+- **Safely serialize custom Resource objects:** Serialize and deserialize custom `Resource` objects into dictionaries, including nested and array structures, without the fear of code injections
 - **JSON-based Format:** Stores data in a human-readable JSON format
 - **Works out of the box:** You don't have to add any autoloads, or turn on any addons. Just copy the files into your project and you're good to go!
-- **C# and GDScript Support:** Works with both scripting languages in Godot
+- **C# and GDScript Support:** Works perfectly with both scripting languages in Godot
 
 ## How It Works
 
 When creating a MorphonConfigFile, the addon scans your project for custom `Resource` scripts, and registers them for serialization.
 When saving, object data is serialized to dictionaries, and when loading, resources are reconstructed with their original registered scripts and property values.
 
-To serialize custom resources that extend built-in types (e.g., `SpriteFrames`), you will have to implement these methods in your script:
+> **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If they are not local to the scene, their resource path will be stored and reloaded.
+
+If you extend a built-in resource type (e.g., `SpriteFrames`) or you don't want every property to be saved from your object, you will have to implement these methods in your script:
+
+GDScript:
 ```gdscript
 func _serialize() -> Dictionary
 func _deserialize(data: Dictionary)
 ```
+Or in C#:
 ```csharp
-public Dictionary Serialize();
-public void Deserialize(Dictionary data);
+public Dictionary _serialize();
+public void _deserialize(Dictionary data);
 ```
 
-> **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If they are not local to the scene, their resource path will be stored and reloaded.
+In the `_serialize` method you have to return a Dictionary with a string key and a value of the property you want to be saved.
+In the `_deserialize` method you have to read the properties back into your objects.
 
-## Usage
+<details>
+  <summary>Example</summary>
 
-### GDScript Example
+  ```gdscript
+  class_name Cat extends Resource
+  
+  @export var name : String
+  @export var age : int
+  @export var color : Color
+
+  func _serialize() -> Dictionary:
+    return {"color": color}
+	
+  func _deserialize(data : Dictionary):
+    color = data["color"]
+  ```
+  
+  This way only the `color` property will get serialized and saved
+</details>
+
+## Usage of MorphonConfigFile
+
+<details>
+<summary>GDScript example</summary>
+First let's create a custom Resource script:
+    
+```gdscript
+class_name Animal extends Resource
+
+@export var Name : String
+@export var Age : int
+
+func speak:
+	print("speak")
+```
+
+And then let's create a class named Cat that extends Animal:
 
 ```gdscript
-var config := MorphonConfigFile.new()
-var animal := Animal.new()
-animal.Name = "Doggo"
-config.set_value("Pets", "Animal", animal)
-config.save("user://save.json")
+class_name Cat extends Animal
 
-config.clear()
-config.load("user://save.json")
-var loaded_animal = config.get_value("Pets", "Animal")
+@export var color : Color
+
+func speak():
+	print("meow")
 ```
 
-### C# Example
+Now lets save it with a MorphonConfigFile!
+Actually, lets save a whole array of Animals!
+
+```gdscript
+extends Node
+
+@export var AnimalList : Array[Animal]
+
+func _ready() -> void:
+	var config := MorphonConfigFile.new()
+	config.set_value("Player", "Pets", AnimalList)
+	config.save("user://save.json")
+	  
+	config.clear()
+	config.load("user://save.json")
+	
+	for i in config.get_value("Player", "Pets") as Array[Animal]:
+		i.speak()
+		print(i.Name)
+		print(i.Age)
+```
+
+After adding some animals to the array from the editor and running the code, we get this in the output:
+  
+```
+speak
+Dog
+7
+meow
+Kitty
+1
+```
+
+And the save file looks like this:
+```json
+{
+    "Player": {
+        "Pets": [
+            {
+                "._typeName": "Animal",
+                "Age": 7,
+                "Name": "Dog"
+            },
+            {
+                "._typeName": "Cat",
+                "Age": 1,
+                "Name": "Kitty",
+                "color": {
+                    "args": [
+                        1.0,
+                        1.0,
+                        0.482353001832962,
+                        1.0
+                    ],
+                    "type": "Color"
+                }
+            }
+        ]
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>C# example</summary>
+First let's create a custom Resource script:
+    
+```csharp
+using Godot;
+
+[GlobalClass]
+public partial class Vehicle : Resource
+{
+    [Export] public string brand;
+    [Export] public Color color;
+
+    public override string ToString()
+    {
+        return $"{brand}: {color}";
+    }
+}
+```
+
+And then let's create a class named Car that inherits from Vehicle:
 
 ```csharp
-MorphonConfigFile config = new();
-config.SetValue("Data", "Vehicles", vehicles);
-config.Save("user://csharpSave.json");
+using Godot;
 
-config.Clear();
-config.Load("user://csharpSave.json");
+[GlobalClass]
+public partial class Car : Vehicle
+{
+    [Export] public int year;
 
-Vehicle[] loadedVehicles = config.GetValue<Array<Vehicle>>("Data", "Vehicles").ToArray();
+    public override string ToString()
+    {
+        return $"{brand}: {color}, {year}";
+    }
+}
 ```
 
+Now lets save an array of Vehicles with a MorphonConfigFile!
+
+```csharp
+using System.Linq;
+using Godot;
+using Godot.Collections;
+
+public partial class TestCsharp : Node
+{
+    [Export] Vehicle[] vehicles;
+
+    public override void _Ready()
+    {
+        MorphonConfigFile config = new();
+
+        config.SetValue("Data", "Vehicles", vehicles);
+        config.Save("user://csharpSave.json");
+
+        config.Clear();
+        config.Load("user://csharpSave.json");
+
+        Vehicle[] loadedVehicles = config.GetValue("Data", "Vehicles").AsGodotObjectArray<Vehicle>();
+
+        foreach (Vehicle vehicle in loadedVehicles)
+        {
+            GD.Print(vehicle.ToString());
+        }
+    }
+}
+
+```
+
+After adding some vehicles to the array from the editor and running the code, we get this in the output:
+  
+```
+Ford: (6.73831E-07, 0.752693, 0.752693, 1), 2004
+Lamborghini: (0, 0.564706, 0, 0.615686)
+Mazda: (0.8, 0, 0, 1), 1989
+```
+
+And the save file looks like this:
+```json
+{
+    "Data": {
+        "Vehicles": [
+            {
+                "._typeName": "Car",
+                "brand": "Ford",
+                "color": {
+                    "args": [
+                        0.000000673830982123036,
+                        0.752692997455597,
+                        0.752692997455597,
+                        1.0
+                    ],
+                    "type": "Color"
+                },
+                "year": 2004
+            },
+            {
+                "._typeName": "Vehicle",
+                "brand": "Lamborghini",
+                "color": {
+                    "args": [
+                        0.0,
+                        0.564706027507782,
+                        0.0,
+                        0.615685999393463
+                    ],
+                    "type": "Color"
+                }
+            },
+            {
+                "._typeName": "Car",
+                "brand": "Mazda",
+                "color": {
+                    "args": [
+                        0.800000011920929,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "type": "Color"
+                },
+                "year": 1989
+            }
+        ]
+    }
+}
+```
+
+</details>
+
 ### Reference vs Cloning in MorphonConfigFile
+
+I also added an extra method `set_cloned_value` that first clones the object, and then stores it in the config. 
 
 - `set_value` / `SetValue`: Stores a reference for that object; later changes to the object are reflected in the config.
 - `set_cloned_value` / `SetClonedValue`: Stores a deep copy; later changes to the object do not affect the saved data.
 
+As you can see, the usage is the exact same for the MorphonConfigFile as for the built-in ConfigFile class, but without arbitrary code execution on deserialization!
+
+## Usage of `MorphonSerializer.var_to_bytes` and `MorphonSerializer.var_to_str`
+
+The library also contains four extra functions, that also works the exact same as the built in ones, but without running any arbitrary code after deserializing `Resources`.
+
+<details>
+	<summary>Example</summary>
+	
+```gdscript
+extends Node
+
+@export var AnimalList: Array[Animal]
+
+func _ready() -> void:
+	print(MorphonSerializer.var_to_str(AnimalList))
+```
+
+Running this code prints:
+```
+[{
+"._typeName": "Animal",
+"Age": 7,
+"Name": "Dog"
+}, {
+"._typeName": "Cat",
+"Age": 1,
+"Name": "Kitty",
+"color": {
+"args": [1.0, 1.0, 0.482353, 1.0],
+"type": "Color"
+}
+}]
+```
+</details>
+
 ## Installation
 
-Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
+- Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
+- **If you want to use the library with C# the path to the addon must be this or it won't work: res://addons/morphon**
 
 ## Limitations
 
 - Built-in resources are not serialized directly, and they are only saved by their paths if they are not local to scene.
 - Only scripts inheriting from `Resource` or implementing the required methods are fully supported for serialization.
-
-## Documentation
-
-For detailed API usage, check out the code documentation in:
-- `addons/morphon/MorphonConfigFile.gd`
-- `addons/morphon/MorphonSerializer.gd`
-- `addons/morphon/MorphonBindings.cs`
-
-The library closely mirrors Godot's `ConfigFile`, making integration straightforward for existing projects.
