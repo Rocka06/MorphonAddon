@@ -178,6 +178,17 @@ public partial class MorphonConfigFile : RefCounted
 
 public static class MorhponSerializer
 {
+    public static bool AutoRegisterCustomResources
+    {
+        get
+        {
+            return m_Script.Get("Auto_Register_Custom_Resources").AsBool();
+        }
+        set
+        {
+            m_Script.Set("Auto_Register_Custom_Resources", value);
+        }
+    }
     readonly static Script m_Script;
 
     static MorhponSerializer()

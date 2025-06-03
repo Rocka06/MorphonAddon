@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://c3vfm561wdpuv"]
+[gd_scene load_steps=28 format=3 uid="uid://c3vfm561wdpuv"]
 
 [ext_resource type="Script" uid="uid://cbmwc5xpbw0c2" path="res://Test.gd" id="1_wtcfe"]
 [ext_resource type="Script" uid="uid://7xy2nqd5rnkf" path="res://Animal.gd" id="2_epypp"]
@@ -29,6 +29,42 @@ color = Color(1, 1, 0.482353, 1)
 Name = "Kitty"
 Age = 1
 metadata/_custom_type_script = "uid://kubb30q8i8au"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4d7sh"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(0, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ta5nu"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(96, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flf07"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k73cj"]
+atlas = ExtResource("4_0hol4")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rjqkl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4d7sh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ta5nu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flf07")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k73cj")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ir8iy"]
 atlas = ExtResource("4_0hol4")
@@ -106,7 +142,8 @@ metadata/_custom_type_script = "uid://b48ifnnm7rp8j"
 script = ExtResource("1_wtcfe")
 AnimalList = Array[ExtResource("2_epypp")]([SubResource("Resource_q6r6c"), SubResource("Resource_kdubu"), SubResource("Resource_d21ai")])
 Icon = ExtResource("4_0hol4")
-frames = SubResource("SpriteFrames_ta5nu")
+frames = SubResource("SpriteFrames_rjqkl")
+framesSerialized = SubResource("SpriteFrames_ta5nu")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(556, 280)

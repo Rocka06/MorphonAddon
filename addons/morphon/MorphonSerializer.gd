@@ -1,12 +1,13 @@
 class_name MorphonSerializer
 
+## Should automatic registration of scripts that extend [Resource] run?
+static var Auto_Register_Custom_Resources := false
+
 static var _jsonTypes := [TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_STRING_NAME]
 static var _registeredScripts : Dictionary[String, String]
 
-static var _autoRegRun := false
-
 static func _scan_and_register_resources():
-	if _autoRegRun:
+	if !Auto_Register_Custom_Resources:
 		return
 
 	var classes := ProjectSettings.get_global_class_list()
@@ -15,30 +16,17 @@ static func _scan_and_register_resources():
 		var name : String = classDict["class"]
 		
 		# Without this a stack overflow would happen
-		if name.contains("Morphon"):
-			continue
-
-		if not script:
+		if name == "MorphonSerializer" or name == "MorphonConfigFile":
 			continue
 
 		var base_type := script.get_instance_base_type()
-		var should_register := false
-
-		if base_type == "Resource":
-			# If the custom resource extends Resource
-			should_register = true
-		elif ClassDB.class_exists(base_type):
-			# If the custom resource extends a built in type
-			var instance := ClassDB.instantiate(base_type)
-			instance.set_script(script)
-			if instance.has_method("_serialize") and instance.has_method("_deserialize"):
-				should_register = true
-				
-		if should_register:
+		var instance := ClassDB.instantiate(base_type)
+		instance.set_script(script)
+		
+		if instance is Resource:
 			register_script_by_path(name, script.resource_path)
 
-
-	_autoRegRun = true
+	Auto_Register_Custom_Resources = false
 
 ## Register a [Script] for serialization.
 ## If the name was already registered the function will throw an error. 
@@ -96,13 +84,12 @@ static func _SerializeRecursive(variant):
 	if variant is Resource:
 		var res := variant as Resource
 		
-		#Check if it is a custom resource or a built in one
-		if res.get_class() == "Resource":
-			return _SerializeResource(res)
-	
 		if res.has_method("_serialize") and res.has_method("_deserialize"):
 			return _SerializeResource(res)
-	
+		
+		if !_GetResourceProperties(res).is_empty():
+			return _SerializeResource(res)
+		
 		if !res.resource_local_to_scene:
 			return res.resource_path
 		
@@ -189,7 +176,7 @@ static func _SerializeResource(res : Resource) -> Dictionary:
 
 	data["._typeName"] = _registeredScripts.find_key(scriptPath)
 	return data
-static func _DeserializeResource(dict : Dictionary):
+static func _DeserializeResource(dict : Dictionary) -> Resource:
 	if dict.is_empty(): 
 		return null
 	
