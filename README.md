@@ -1,21 +1,21 @@
 # MorphonAddon
 
-MorphonAddon is a library for [Godot](https://godotengine.org/) 4.x that provides safe serialization and deserialization for custom `Resource` objects.
-It works in both GDScript and C#, and offers a similar API similar to Godot's built-in `ConfigFile`.
+MorphonAddon is a library for [Godot](https://godotengine.org/) 4.4+ that provides safe serialization and deserialization for custom `Resource` objects.
+It works in both GDScript and C#, and offers an API similar to Godot's built-in `ConfigFile`.
 
 ## Features
 
-- **Custom Resource Serialization:** Serialize and deserialize custom `Resource` objects, including nested and array structures.
-- **JSON-based Format:** Stores data in a human-readable JSON format.
-- **Automatic Resource Registration:** Automatically scans and registers all custom `Resource` scripts in your project for safe serialization.
-- **C# and GDScript Support:** Works with both scripting languages in Godot.
+- **Custom Resource Serialization:** Serialize and deserialize custom `Resource` objects, including nested and array structures
+- **JSON-based Format:** Stores data in a human-readable JSON format
+- **Works out of the box:** You don't have to add any autoloads, or turn on any addons. Just copy the files into your project and you're good to go!
+- **C# and GDScript Support:** Works with both scripting languages in Godot
 
 ## How It Works
 
 When creating a MorphonConfigFile, the addon scans your project for custom `Resource` scripts, and registers them for serialization.
 When saving, object data is serialized to dictionaries, and when loading, resources are reconstructed with their original registered scripts and property values.
 
-To serialize custom resources that extend built-in types (e.g., `SpriteFrames`), implement the following methods in your script:
+To serialize custom resources that extend built-in types (e.g., `SpriteFrames`), you will have to implement these methods in your script:
 ```gdscript
 func _serialize() -> Dictionary
 func _deserialize(data: Dictionary)
@@ -56,7 +56,7 @@ config.Load("user://csharpSave.json");
 Vehicle[] loadedVehicles = config.GetValue<Array<Vehicle>>("Data", "Vehicles").ToArray();
 ```
 
-### Reference vs Cloning
+### Reference vs Cloning in MorphonConfigFile
 
 - `set_value` / `SetValue`: Stores a reference for that object; later changes to the object are reflected in the config.
 - `set_cloned_value` / `SetClonedValue`: Stores a deep copy; later changes to the object do not affect the saved data.
@@ -68,13 +68,13 @@ Copy the `addons/morphon` directory into your project's `addons` folder and you 
 ## Limitations
 
 - Built-in resources are not serialized directly, and they are only saved by their paths if they are not local to scene.
-- Only scripts inheriting from `Resource` or implementing the required interface are fully supported for serialization.
+- Only scripts inheriting from `Resource` or implementing the required methods are fully supported for serialization.
 
 ## Documentation
 
-For detailed API usage, refer to the code documentation in:
+For detailed API usage, check out the code documentation in:
 - `addons/morphon/MorphonConfigFile.gd`
 - `addons/morphon/MorphonSerializer.gd`
 - `addons/morphon/MorphonBindings.cs`
 
-The API closely mirrors Godot's `ConfigFile`, making integration straightforward for existing projects.
+The library closely mirrors Godot's `ConfigFile`, making integration straightforward for existing projects.
