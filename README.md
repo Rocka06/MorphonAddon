@@ -21,15 +21,17 @@ MorphonAddon is a **safe serialization library for Godot 4.4+** that works with 
 
 ## How It Works
 
-When you use MorphonConfigFile, the addon scans your project for custom `Resource` scripts and registers them for serialization.  
+When you create a MorphonConfigFile, the addon scans your project for custom `Resource` scripts and registers them for serialization.  
 - **Saving:** Object data is converted to dictionaries.
 - **Loading:** Objects are rebuilt with the correct script and property values.
 
 > **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If not local to the scene, only their path is stored and reloaded.
 
+---
+
 ### Custom Serialization
 
-To control which properties are saved or if you extend a built-in resource type (e.g., `SpriteFrames`),  you will have to implement these methods in your script:
+To control which properties are saved, you will have to implement these methods in your script:
 
 **GDScript**
 ```gdscript
@@ -63,6 +65,78 @@ In the `_deserialize` method you have to read the properties back into your obje
   ```
   In this case only the `color` property will be saved.
 </details>
+
+#### This way you can also serialize built-in resources, for example SpriteFrames:
+
+```gdscript
+
+class_name SpriteFramesSerialized extends SpriteFrames
+
+func _serialize() -> Dictionary:
+	return {"animations": get("animations")}
+	
+func _deserialize(data : Dictionary):
+	set("animations", data["animations"])
+```
+
+The saved data will look something like this:
+
+```json
+{
+	"._typeName": "SpriteFramesSerialized",
+	"animations": [
+	{
+	    "frames": [
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_ir8iy"
+		},
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_hqns4"
+		},
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_x0ka3"
+		},
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_0h7mo"
+		},
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_nr8wp"
+		},
+		{
+		    "duration": 1.0,
+		    "texture": "res://node_2d.tscn::AtlasTexture_d2bti"
+		}
+	    ],
+	    "loop": true,
+	    "name": "default",
+	    "speed": 5.0
+	}
+	]
+}
+```
+
+---
+
+### Resource Serialization Details
+
+When serializing resources, the following logic is applied:
+
+- **Custom Serialization Methods**:  
+  If a resource implements `_serialize` and `_deserialize`, these methods will be used for serialization and deserialization.
+
+- **Script Properties**:  
+  If the resource has script properties, those properties will be serialized.
+
+- **Resource Path Fallback**:  
+  If neither of the above applies, the resource will be saved by its path but only if it is not local to the scene.
+
+- **Limitation**:  
+  If the resource is local to the scene and none of the above conditions are met, the resource cannot be serialized.
 
 ---
 
@@ -287,6 +361,38 @@ And the save file looks like this:
 
 </details>
 
+---
+
+### ⚠️ Resource Script Registration
+
+MorphonSerializer supports automatic registration of custom resource scripts for serialization.  
+This feature is controlled by the `Auto_Register_Custom_Resources` flag which is turned off by default:
+
+- **Automatic Registration (recommended for most cases):**  
+  When `MorphonSerializer.Auto_Register_Custom_Resources` is set to `true`, all scripts that extend `Resource` (or any other built-in resource where the script implements `_serialize` and `_deserialize`) will be automatically registered when serialization occurs.
+
+- **Manual Registration:**  
+  If `Auto_Register_Custom_Resources` is `false`, you will have to manually register each script you wish to serialize using `MorphonSerializer.register_script(name, script)` (or `register_script_by_path(name, path)`).
+
+**Warning:**  
+If a script is not registered (manually or automatically), serialization and deserialization for its resources will fail.
+
+#### Example: Manual Script Registration
+
+```gdscript
+# Suppose you have a custom resource script at 'res://my_resource.gd'
+
+MorphonSerializer.register_script_by_path("MyResource", "res://my_resource.gd")
+```
+
+- Use a unique name for each script.
+- Registration should be done before any (de)serialization takes place.
+
+**Tip:**  
+For most projects, enabling `Auto_Register_Custom_Resources` is easier and less error-prone.
+
+---
+
 ### Reference vs Cloning in MorphonConfigFile
 
 I also added an extra method `set_cloned_value` that first clones the object, and then stores it in the config. 
@@ -323,11 +429,6 @@ func _ready() -> void:
 
 - Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
 - **If you want to use the library with C# the path to the addon must be `res://addons/morphon` or it won't work**
-
-## Limitations
-
-- Built-in resources (like SpriteFrames) are not serialized directly, and they are only saved by their paths if they are not local to scene.
-- Only scripts inheriting from `Resource` or implementing the required methods are fully supported for serialization.
 
 ## License
 
