@@ -9,24 +9,24 @@ static var _registeredScripts : Dictionary[String, String]
 static func _scan_and_register_resources():
 	if !Auto_Register_Custom_Resources:
 		return
+	Auto_Register_Custom_Resources = false
 
 	var classes := ProjectSettings.get_global_class_list()
 	for classDict in classes:
 		var script := load(classDict["path"]) as Script
 		var name : String = classDict["class"]
 		
-		# Without this a stack overflow would happen
+		if script.is_abstract(): 
+			continue
+		
 		if name == "MorphonSerializer" or name == "MorphonConfigFile":
 			continue
-
+		
 		var base_type := script.get_instance_base_type()
 		var instance := ClassDB.instantiate(base_type)
-		instance.set_script(script)
 		
 		if instance is Resource:
 			register_script_by_path(name, script.resource_path)
-
-	Auto_Register_Custom_Resources = false
 
 ## Register a [Script] for serialization.
 ## If the name was already registered the function will throw an error. 
