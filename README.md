@@ -428,7 +428,7 @@ func _ready() -> void:
 ## Installation
 
 - Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
-- **If you want to use the library with C# the path to the addon must be `res://addons/morphon` or it won't work**
+- **The path to the addon must be `res://addons/morphon` otherwise it won't work!**
 
 ## License
 

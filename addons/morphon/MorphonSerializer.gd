@@ -1,32 +1,37 @@
 class_name MorphonSerializer
 
-## Should automatic registration of scripts that extend [Resource] run?
+## Should automatic registration of scripts run?
 static var Auto_Register_Custom_Resources := false
+static var _autoRegRun := false
 
 static var _jsonTypes := [TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_STRING_NAME]
-static var _registeredScripts : Dictionary[String, String]
+static var _registeredScripts : Dictionary[String, String] = {}
 
 static func _scan_and_register_resources():
 	if !Auto_Register_Custom_Resources:
 		return
-	Auto_Register_Custom_Resources = false
-
+	if _autoRegRun:
+		return
+	
+	_autoRegRun = true
+	
 	var classes := ProjectSettings.get_global_class_list()
 	for classDict in classes:
-		var script := load(classDict["path"]) as Script
 		var name : String = classDict["class"]
+		var path : String = classDict["path"]
+		var isAbstract : bool = classDict["is_abstract"]
 		
-		if script.is_abstract(): 
+		if isAbstract:
 			continue
 		
 		if name == "MorphonSerializer" or name == "MorphonConfigFile":
 			continue
 		
-		var base_type := script.get_instance_base_type()
-		var instance := ClassDB.instantiate(base_type)
+		var script : Script = load(path)
+		var instance := ClassDB.instantiate(script.get_instance_base_type())
 		
 		if instance is Resource:
-			register_script_by_path(name, script.resource_path)
+			register_script_by_path(name, path)
 
 ## Register a [Script] for serialization.
 ## If the name was already registered the function will throw an error. 
@@ -58,10 +63,12 @@ static func register_script_by_path(name : String, path : String):
 ## }
 ## [/codeblock]
 static func var_to_str(variant) -> String:
+	_scan_and_register_resources()
 	return var_to_str(_SerializeRecursive(variant))
 
 ## Encodes a [Variant] value to a [PackedByteArray]. Deserialization can be done with [method MorphonSerializer.bytes_to_var].
 static func var_to_bytes(variant) -> PackedByteArray:
+	_scan_and_register_resources()
 	return var_to_bytes(_SerializeRecursive(variant))
 
 ## Converts a formatted string that was returned by [method MorphonSerializer.var_to_str] to the original [Variant]
@@ -70,11 +77,13 @@ static func var_to_bytes(variant) -> PackedByteArray:
 ## var dict = str_to_var(data)     # dict is a Dictionary
 ## print(dict["a"])                # Prints 1
 ##[/codeblock]
-static func str_to_var(str : String):
+static func str_to_var(str : String) -> Variant:
+	_scan_and_register_resources()
 	return _DeserializeRecursive(str_to_var(str))
 
 ## Decodes a [PackedByteArray] back to a [Variant] value.
-static func bytes_to_var(bytes : PackedByteArray):
+static func bytes_to_var(bytes : PackedByteArray) -> Variant:
+	_scan_and_register_resources()
 	return _DeserializeRecursive(bytes_to_var(bytes))
 
 static func _SerializeRecursive(variant):
@@ -160,6 +169,7 @@ static func _DeserializeRecursive(variant):
 	return JSON.to_native(variant)
 
 static func _SerializeResource(res : Resource) -> Dictionary:
+	_scan_and_register_resources()
 	var data : Dictionary
 	
 	if res.has_method("_serialize"):
@@ -177,6 +187,7 @@ static func _SerializeResource(res : Resource) -> Dictionary:
 	data["._typeName"] = _registeredScripts.find_key(scriptPath)
 	return data
 static func _DeserializeResource(dict : Dictionary) -> Resource:
+	_scan_and_register_resources()
 	if dict.is_empty(): 
 		return null
 	

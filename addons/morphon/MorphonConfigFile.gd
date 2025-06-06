@@ -26,8 +26,9 @@ class_name MorphonConfigFile extends RefCounted
 
 var _values : Dictionary[String, Dictionary]
 
-func _init() -> void:
-	MorphonSerializer._scan_and_register_resources()
+# Loading MorphonSerializer this way fixes a race condition bug
+# where Godot would sometimes throw a parse error for the class
+var _serializer : Script = preload("res://addons/morphon/MorphonSerializer.gd")
 
 ## Assigns a value to the specified key of the specified section.[br]
 ## If either the section or the key do not exist, they are created. [br]
@@ -56,8 +57,8 @@ func set_cloned_value(section : String, key : String, value):
 	#The reason I wrote it this way is because .duplicate
 	#doesn't always work
 	
-	var serialized = MorphonSerializer._SerializeRecursive(value)
-	var deserialized = MorphonSerializer._DeserializeRecursive(serialized)
+	var serialized = _serializer._SerializeRecursive(value)
+	var deserialized = _serializer._DeserializeRecursive(serialized)
 	
 	set_value(section, key, deserialized)
 
@@ -162,7 +163,7 @@ func encode_to_text() -> String:
 		
 		var keys = _values[sectionKey].keys()
 		for key in keys:
-			nestedDict[key] = MorphonSerializer._SerializeRecursive(_values[sectionKey][key])
+			nestedDict[key] = _serializer._SerializeRecursive(_values[sectionKey][key])
 		
 		dict[sectionKey] = nestedDict
 	
@@ -197,7 +198,7 @@ func parse(data : String) -> Error:
 		var valueKeys := valueDict.keys()
 		
 		for key in valueKeys:
-			set_value(sectionKey, key, MorphonSerializer._DeserializeRecursive(valueDict[key]))
+			set_value(sectionKey, key, _serializer._DeserializeRecursive(valueDict[key]))
 		
 	return OK
 
