@@ -15,9 +15,17 @@ run/main_scene="uid://c3vfm561wdpuv"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+_morphonRegisterer="*res://addons/morphon/MorphonGeneratedRegisterer.gd"
+
 [dotnet]
 
 project/assembly_name="MorphonAddon"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/morphon/plugin.cfg")
 
 [rendering]
 

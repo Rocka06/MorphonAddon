@@ -5,9 +5,6 @@ extends Node
 @export var frames : SpriteFrames
 @export var framesSerialized : SpriteFramesSerialized
 
-func _init() -> void:
-	MorphonSerializer.Auto_Register_Custom_Resources = true
-
 func _ready() -> void:
 	var config := MorphonConfigFile.new()
 	
