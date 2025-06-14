@@ -14,22 +14,32 @@ MorphonAddon is a **safe serialization library for Godot 4.4+** that works with 
 
 - **Safely serialize custom Resource objects:** Serialize and deserialize custom `Resource` objects into dictionaries, including nested and array structures, without the fear of code injections
 - **JSON-based Format:** Stores data in a human-readable JSON format
-- **Works out of the box:** You don't have to add any autoloads, or turn on any addons. Just copy the files into your project and you're good to go!
 - **C# and GDScript Support:** Works perfectly with both scripting languages in Godot
 
----
-
-## How It Works
-
-When you create a MorphonConfigFile, the addon scans your project for custom `Resource` scripts and registers them for serialization.  
-- **Saving:** Object data is converted to dictionaries.
-- **Loading:** Objects are rebuilt with the correct script and property values.
-
-> **Note:** Built-in resources (like `SpriteFrames`) are not serialized directly. If not local to the scene, only their path is stored and reloaded.
+> **Limitation**:
+> Built-in resources (like SpriteFrames) are not serialized directly. If not local to the scene, only their path is stored and reloaded.
 
 ---
 
-### Custom Serialization
+## How resources are serialized
+
+When serializing resources, the following logic is applied:
+
+- **Custom Serialization Methods**:  
+  If a resource implements `_serialize` and `_deserialize`, these methods will be used for serialization and deserialization.
+
+- **Script Properties**:  
+  If the resource has script properties, those properties will be serialized.
+
+- **Resource Path Fallback**:  
+  If neither of the above applies, the resource will be saved by its path but only if it is not local to the scene.
+
+- **Limitation**:  
+  If the resource is local to the scene and none of the above conditions are met, the resource cannot be serialized.
+
+---
+
+## Custom Serialization
 
 To control which properties are saved, you will have to implement these methods in your script:
 
@@ -119,24 +129,6 @@ The saved data will look something like this:
 	]
 }
 ```
-
----
-
-### Resource Serialization Details
-
-When serializing resources, the following logic is applied:
-
-- **Custom Serialization Methods**:  
-  If a resource implements `_serialize` and `_deserialize`, these methods will be used for serialization and deserialization.
-
-- **Script Properties**:  
-  If the resource has script properties, those properties will be serialized.
-
-- **Resource Path Fallback**:  
-  If neither of the above applies, the resource will be saved by its path but only if it is not local to the scene.
-
-- **Limitation**:  
-  If the resource is local to the scene and none of the above conditions are met, the resource cannot be serialized.
 
 ---
 
@@ -361,18 +353,15 @@ And the save file looks like this:
 
 </details>
 
----
-
 ### ⚠️ Resource Script Registration
 
-MorphonSerializer supports automatic registration of custom resource scripts for serialization.  
-This feature is controlled by the `Auto_Register_Custom_Resources` flag which is turned off by default:
+Before you try to save any resources, you will have to register your scripts.
 
-- **Automatic Registration (recommended for most cases):**  
-  When `MorphonSerializer.Auto_Register_Custom_Resources` is set to `true`, all scripts that extend `Resource` (or any other built-in resource where the script implements `_serialize` and `_deserialize`) will be automatically registered when serialization occurs.
+I have added a button (`Project -> Tools -> Generate Morphon Registerer Script`) to the editor, that will get every Resource class you created, and create a file in `addons/morphon` called `MorphonGeneratedRegisterer.gd`.
+This file will be automatically added to your autoloads, but you will have to enable it manually.
 
-- **Manual Registration:**  
-  If `Auto_Register_Custom_Resources` is `false`, you will have to manually register each script you wish to serialize using `MorphonSerializer.register_script(name, script)` (or `register_script_by_path(name, path)`).
+What this script will do is assign a name to your scripts paths, that will later be used for serialization.
+If you don't want a script to be serializable, you can remove it from the file, or you can register your scripts manually using `MorphonSerializer.register_script(name, script)` (or `register_script_by_path(name, path)`).
 
 **Warning:**  
 If a script is not registered (manually or automatically), serialization and deserialization for its resources will fail.
@@ -387,9 +376,6 @@ MorphonSerializer.register_script_by_path("MyResource", "res://my_resource.gd")
 
 - Use a unique name for each script.
 - Registration should be done before any (de)serialization takes place.
-
-**Tip:**  
-For most projects, enabling `Auto_Register_Custom_Resources` is easier and less error-prone.
 
 ---
 
@@ -427,8 +413,8 @@ func _ready() -> void:
 
 ## Installation
 
-- Copy the `addons/morphon` directory into your project's `addons` folder and you are all done!
-- **The path to the addon must be `res://addons/morphon` otherwise it won't work!**
+- Copy the `addons/morphon` directory into your project's `addons` folder
+- Enable the addon in `Project -> Project Settings -> Plugins`
 
 ## License
 
