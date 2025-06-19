@@ -178,17 +178,6 @@ public partial class MorphonConfigFile : RefCounted
 
 public static class MorhponSerializer
 {
-    public static bool AutoRegisterCustomResources
-    {
-        get
-        {
-            return m_Script.Get("Auto_Register_Custom_Resources").AsBool();
-        }
-        set
-        {
-            m_Script.Set("Auto_Register_Custom_Resources", value);
-        }
-    }
     readonly static Script m_Script;
 
     static MorhponSerializer()
@@ -209,7 +198,7 @@ public static class MorhponSerializer
     /// </summary>
     public static string VarToStr(Variant variant)
     {
-        return m_Script.Call("var_to_str", variant).As<string>();
+        return m_Script.Call("var_to_str", variant).AsString();
     }
 
     /// <summary>
@@ -225,6 +214,6 @@ public static class MorhponSerializer
     /// </summary>
     public static byte[] VarToBytes(Variant variant)
     {
-        return m_Script.Call("var_to_bytes", variant).As<byte[]>();
+        return m_Script.Call("var_to_bytes", variant).AsByteArray();
     }
 }
